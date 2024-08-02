@@ -1,206 +1,93 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 import requests
+import re
 import time
 import os
 
 app = Flask(__name__)
 
-headers = {
-    'Connection': 'keep-alive',
-    'Cache-Control': 'max-age=0',
-    'Upgrade-Insecure-Requests': '1',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate',
-    'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
-    'referer': 'www.google.com'
-}
+def make_request(url, headers, cookies):
+    try:
+        response = requests.get(url, headers=headers, cookies=cookies).text
+        return response
+    except requests.RequestException as e:
+        return str(e)
 
-
-@app.route('/')
-def index():
-    return '''
-        <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRICKER RULEX SEERAT MULTI CONVO</title>
-    <style>
-        /* CSS for styling elements */
-
-            
-
-label{
-    color: white;
-}
-
-.file{
-    height: 30px;
-}
-body{
-    background-image: url('https://i.ibb.co/JtNcVyb/IMG-20240710-WA0051-1.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    
-}
-    .container{
-      max-width: 700px;
-      height: 600px;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      box-shadow: 0 0 10px white;
-            border: none;
-            resize: none;
-    }
-        .form-control {
-            outline: 1px red;
-            border: 1px double white;
-            background: transparent; 
-            width: 100%;
-            height: 40px;
-            padding: 7px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            color: white;
-        }
-        .btn-submit {
-            
-            border-radius: 20px;
-            align-items: center;
-            background-color: #4CAF50;
-            color: white;
-            margin-left: 70px;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-        }
-                .btn-submit:hover{
-                    background-color: red;
-                }
-            
-        h3{
-            text-align: center;
-            color: white;
-            font-family: cursive;
-        }
-        h2{
-            text-align: center;
-            color: white;
-            font-size: 14px;
-            font-family: Courier;
-        }
-    </style>
-</head>
-<body>
-
-
-<div class="container">
-    <h3>MULTI CONVO</h3>
-    <h2></h2>
-    <form action="/" method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="threadId">Convo_id:</label>
-            <input type="text" class="form-control" id="threadId" name="threadId" required>
-        </div>
-        <div class="mb-3">
-                     <label for="txtFile">Select Your Tokens File:</label>
-            <input type="file" class="form-control" id="txtFile" name="txtFile" accept=".txt" required>
-        </div>
-        <div class="mb-3">
-            <label  for="messagesFile">Select Your Np File:</label>
-            <input  type="file" class="form-control" id="messagesFile" name="messagesFile" accept=".txt" placeholder="NP" required>
-        </div>
-        <div class="mb-3">
-            <label for="kidx">Enter Hater Name:</label>
-            <input type="text" class="form-control" id="kidx" name="kidx" required>
-        </div>
-        <div class="mb-3">
-            <label for="time">Speed in Seconds: </label>
-            <input type="number" class="form-control" id="time" name="time" value="60" required>
-        </div>
-        <br />
-        <button type="submit" class="btn btn-primary btn-submit">Submit Your Details</button>
-    </form>
-    <h3>Developer :SEERAT QUEEN</h3>
-    
-</div
-    
-    '''
 @app.route('/', methods=['GET', 'POST'])
-def send_message():
+def index():
     if request.method == 'POST':
-        thread_id = request.form.get('threadId')
-        mn = request.form.get('kidx')
-        time_interval = int(request.form.get('time'))
+        password = request.form['password']
+        if password == "SEERAT RULEX":
+            return redirect(url_for('TRICKER SEERAT RULEX BRAND'))
+        else:
+            return render_template('index.html', error="Incorrect Password! Try again.")
+    return render_template('index.html')
 
-        txt_file = request.files['txtFile']
-        access_tokens = txt_file.read().decode().splitlines()
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    if request.method == 'POST':
+        cookies = request.form['cookie']
+        id_post = request.form['post_id']
+        commenter_name = request.form['heatres_name']
+        delay = int(request.form['delay'])
+        comment_file = request.files['comment_file']
+        comment_file_path = os.path.join('uploads', comment_file.filename)
+        comment_file.save(comment_file_path)
 
-        messages_file = request.files['messagesFile']
-        messages = messages_file.read().decode().splitlines()
+        response = make_request('https://business.facebook.com/business_locations', headers={
+            'Cookie': cookies,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 11; RMX2144 Build/RKQ1.201217.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/103.0.5060.71 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/375.1.0.28.111;]'
+        }, cookies={'Cookie': cookies})
 
-        num_comments = len(messages)
-        max_tokens = len(access_tokens)
+        if response is None:
+            return render_template('dashboard.html', error="Error making initial request")
 
-        # Create a folder with the Convo ID
-        folder_name = f"Convo_{thread_id}"
-        os.makedirs(folder_name, exist_ok=True)
+        try:
+            token_eaag = re.search('(EAAG\w+)', str(response)).group(1)
+        except AttributeError:
+            return render_template('dashboard.html', error="Token not found in response")
 
-        # Create files inside the folder
-        with open(os.path.join(folder_name, "CONVO.txt"), "w") as f:
-            f.write(thread_id)
+        with open(comment_file_path, 'r') as file:
+            comments = file.readlines()
 
-        with open(os.path.join(folder_name, "token.txt"), "w") as f:
-            f.write("\n".join(access_tokens))
-
-        with open(os.path.join(folder_name, "haters.txt"), "w") as f:
-            f.write(mn)
-
-        with open(os.path.join(folder_name, "time.txt"), "w") as f:
-            f.write(str(time_interval))
-
-        with open(os.path.join(folder_name, "message.txt"), "w") as f:
-            f.write("\n".join(messages))
-
-        with open(os.path.join(folder_name, "np.txt"), "w") as f:
-            f.write("NP")  # Assuming NP is a fixed value
-
-        post_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
-        haters_name = mn
-        speed = time_interval
+        x, y = 0, 0
+        results = []
 
         while True:
             try:
-                for message_index in range(num_comments):
-                    token_index = message_index % max_tokens
-                    access_token = access_tokens[token_index]
+                time.sleep(delay)
+                teks = comments[x].strip()
+                comment_with_name = f"{heatres_name}: {teks}"
+                data = {
+                    'message': comment_with_name,
+                    'access_token': token_eaag
+                }
+                response2 = requests.post(f'https://graph.facebook.com/{id_post}/comments/', data=data, cookies={'Cookie': cookies}).json()
+                if 'id' in response2:
+                    results.append({
+                        'post_id': id_post,
+                        'datetime': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'comment': comment_with_name,
+                        'status': 'Success'
+                    })
+                    x = (x + 1) % len(comments)
+                else:
+                    y += 1
+                    results.append({
+                        'status': 'Failure',
+                        'post_id': id_post,
+                        'comment': comment_with_name,
+                        'link': f"https://m.basic.facebook.com//{id_post}"
+                    })
+            except requests.RequestException as e:
+                results.append({'status': 'Error', 'message': str(e)})
+                time.sleep(5.5)
+                continue
 
-                    message = messages[message_index].strip()
+        return render_template('dashboard.html', results=results)
 
-                    parameters = {'access_token': access_token,
-                                  'message': haters_name + ' ' + message}
-                    response = requests.post(
-                        post_url, json=parameters, headers=headers)
+    return render_template('dashboard.html')
 
-                    current_time = time.strftime("%Y-%m-%d %I:%M:%S %p")
-                    if response.ok:
-                        print("[+] SEND SUCCESSFUL No. {} Post Id {}  time{}: Token No.{}".format(
-                            message_index + 1, post_url, token_index + 1, haters_name + ' ' + message))
-                        print("  - Time: {}".format(current_time))
-                        print("\n" * 2)
-                    else:
-                        print("[x] Failed to send Comment No. {} Post Id {} Token No. {}: {}".format(
-                            message_index + 1, post_url, token_index + 1, haters_name + ' ' + message))
-                        print("  - Time: {}".format(current_time))
-                        print("\n" * 2)
-                    time.sleep(speed)
-            except Exception as e:
-              
-                      
-                print(e)
-                time.sleep(30)
-
-    return redirect(url_for('index'))
 if __name__ == '__main__':
+    os.makedirs('uploads', exist_ok=True)
     app.run(host='0.0.0.0', port=5000)
